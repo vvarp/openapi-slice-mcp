@@ -121,7 +121,7 @@ class OpenAPISpecProcessor:
 mcp = FastMCP(
     name="OpenAPI Slice Server",
     instructions="""This server helps you work with large OpenAPI specifications by extracting only the relevant parts for specific endpoints.
-    
+
     Use 'load_openapi_spec' to load a YAML or JSON OpenAPI specification from a file.
     Use 'list_endpoints' to see all available endpoints in the loaded spec.
     Use 'extract_endpoint_slice' to get a minimal OpenAPI spec containing only the specified endpoint and its dependencies.
@@ -244,5 +244,10 @@ def get_server_status() -> str:
         return f"Status: Error - {str(e)}"
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the OpenAPI Slice MCP server."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
