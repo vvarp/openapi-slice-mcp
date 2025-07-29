@@ -1,0 +1,10 @@
+[project]
+name = "openapi-slice-mcp"
+version = "0.1.0"
+description = "MCP server that extracts relevant portions of OpenAPI specs for specific endpoints, reducing context size when working with large API specifications"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.10.6",
+    "pyyaml>=6.0",
+]
