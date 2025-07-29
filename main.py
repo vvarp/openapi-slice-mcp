@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
+from urllib.parse import urlparse
 
+import httpx
 import yaml
 from fastmcp import FastMCP
 
@@ -122,7 +124,8 @@ mcp = FastMCP(
     name="OpenAPI Slice Server",
     instructions="""This server helps you work with large OpenAPI specifications by extracting only the relevant parts for specific endpoints.
 
-    Use 'load_openapi_spec' to load a YAML or JSON OpenAPI specification from a file.
+    Use 'load_openapi_spec' to load a YAML or JSON OpenAPI specification from a local file.
+    Use 'load_openapi_spec_from_url' to load an OpenAPI specification from a remote URL.
     Use 'list_endpoints' to see all available endpoints in the loaded spec.
     Use 'extract_endpoint_slice' to get a minimal OpenAPI spec containing only the specified endpoint and its dependencies.
     """,
@@ -227,6 +230,75 @@ def extract_endpoint_slice(path: str, method: str, output_format: str = "yaml") 
         return f"Error: {str(e)}"
     except Exception as e:
         return f"Error extracting endpoint slice: {str(e)}"
+
+
+@mcp.tool
+def load_openapi_spec_from_url(url: str, timeout: int = 30) -> str:
+    """Load an OpenAPI specification from a remote URL.
+    
+    Args:
+        url: The URL to fetch the OpenAPI specification from
+        timeout: Request timeout in seconds (default: 30)
+    """
+    global current_processor
+    
+    try:
+        # Validate URL
+        parsed_url = urlparse(url)
+        if not parsed_url.scheme or not parsed_url.netloc:
+            return "Error: Invalid URL provided"
+        
+        if parsed_url.scheme not in ['http', 'https']:
+            return "Error: Only HTTP and HTTPS URLs are supported"
+        
+        # Fetch the specification
+        with httpx.Client(timeout=timeout) as client:
+            response = client.get(url)
+            response.raise_for_status()
+            
+            content_type = response.headers.get('content-type', '').lower()
+            
+            # Parse based on content type or URL extension
+            if 'application/json' in content_type or url.lower().endswith('.json'):
+                spec_data = response.json()
+            elif ('application/yaml' in content_type or 
+                  'application/x-yaml' in content_type or 
+                  'text/yaml' in content_type or
+                  url.lower().endswith(('.yaml', '.yml'))):
+                spec_data = yaml.safe_load(response.text)
+            else:
+                # Try to parse as YAML first, then JSON
+                try:
+                    spec_data = yaml.safe_load(response.text)
+                except yaml.YAMLError:
+                    try:
+                        spec_data = response.json()
+                    except json.JSONDecodeError:
+                        return "Error: Unable to parse response as YAML or JSON"
+        
+        if not isinstance(spec_data, dict) or "paths" not in spec_data:
+            return "Error: Invalid OpenAPI specification - must contain 'paths' section"
+        
+        current_processor = OpenAPISpecProcessor(spec_data)
+        
+        endpoints_count = len([path for path in spec_data.get("paths", {}).keys()])
+        spec_title = spec_data.get("info", {}).get("title", "Unknown")
+        spec_version = spec_data.get("info", {}).get("version", "Unknown")
+        
+        return f"Successfully loaded OpenAPI spec from {url}: {spec_title} v{spec_version} with {endpoints_count} paths"
+        
+    except httpx.TimeoutException:
+        return f"Error: Request timeout after {timeout} seconds"
+    except httpx.HTTPStatusError as e:
+        return f"Error: HTTP {e.response.status_code} - {e.response.reason_phrase}"
+    except httpx.RequestError as e:
+        return f"Error: Network request failed - {str(e)}"
+    except yaml.YAMLError as e:
+        return f"Error parsing YAML content: {str(e)}"
+    except json.JSONDecodeError as e:
+        return f"Error parsing JSON content: {str(e)}"
+    except Exception as e:
+        return f"Error loading specification from URL: {str(e)}"
 
 
 @mcp.tool

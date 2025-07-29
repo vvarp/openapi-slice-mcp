@@ -7,14 +7,16 @@ An MCP (Model Context Protocol) server that helps you work with large OpenAPI sp
 - **Endpoint-specific extraction**: Get minimal OpenAPI specs containing only the requested endpoint and its dependencies
 - **Automatic dependency resolution**: Recursively finds and includes all referenced components (schemas, parameters, etc.)
 - **Multiple formats**: Output in YAML or JSON format
-- **File support**: Load OpenAPI specs from YAML or JSON files
+- **File support**: Load OpenAPI specs from local YAML or JSON files
+- **Remote support**: Fetch OpenAPI specs directly from URLs (HTTP/HTTPS)
 - **Discovery tools**: List all available endpoints in a loaded specification
 
 ## Tools
 
 The server provides the following MCP tools:
 
-- `load_openapi_spec(file_path: str)` - Load an OpenAPI specification from a YAML or JSON file
+- `load_openapi_spec(file_path: str)` - Load an OpenAPI specification from a local YAML or JSON file
+- `load_openapi_spec_from_url(url: str, timeout: int = 30)` - Load an OpenAPI specification from a remote URL
 - `list_endpoints()` - List all available endpoints in the currently loaded specification
 - `extract_endpoint_slice(path: str, method: str, output_format: str = "yaml")` - Extract a minimal spec slice for a specific endpoint
 - `get_server_status()` - Get the current status of the server
