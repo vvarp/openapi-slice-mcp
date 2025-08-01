@@ -1,4 +1,5 @@
 # OpenAPI Slice MCP Server
+[![smithery badge](https://smithery.ai/badge/@vvarp/openapi-slice-mcp)](https://smithery.ai/server/@vvarp/openapi-slice-mcp)
 
 An MCP (Model Context Protocol) server that helps you work with large OpenAPI specifications by extracting only the relevant portions for specific endpoints. This is particularly useful when working with LLMs that have context limitations - instead of loading an entire large OpenAPI spec, you can extract just the parts you need for a specific endpoint.
 
@@ -22,6 +23,14 @@ The server provides the following MCP tools:
 - `get_server_status()` - Get the current status of the server
 
 ## Usage
+
+### Installing via Smithery
+
+To install openapi-slice-mcp for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@vvarp/openapi-slice-mcp):
+
+```bash
+npx -y @smithery/cli install @vvarp/openapi-slice-mcp --client claude
+```
 
 ### Running the Server
 
