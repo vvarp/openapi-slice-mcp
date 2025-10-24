@@ -24,6 +24,7 @@ dependencies = [
     "fastmcp>=2.10.6",
     "pyyaml>=6.0",
     "httpx>=0.27.0",
+    "uvicorn>=0.30.0",
 ]
 
 [project.license]
@@ -31,6 +32,7 @@ text = "MIT"
 
 [project.scripts]
 openapi-slice-mcp = "main:main"
+openapi-slice-mcp-http = "main:main_http"
 
 [project.urls]
 Homepage = "https://github.com/vvarp/openapi-slice-mcp"

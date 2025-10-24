@@ -1,4 +1,6 @@
+import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
@@ -318,7 +320,45 @@ def get_server_status() -> str:
 
 def main():
     """Entry point for the OpenAPI Slice MCP server."""
-    mcp.run()
+    parser = argparse.ArgumentParser(
+        description="OpenAPI Slice MCP Server - Extract relevant portions of OpenAPI specs"
+    )
+    parser.add_argument(
+        "--transport",
+        type=str,
+        choices=["stdio", "http"],
+        default=os.getenv("MCP_TRANSPORT", "stdio"),
+        help="Transport mode: stdio (default) or http",
+    )
+    parser.add_argument(
+        "--host",
+        type=str,
+        default=os.getenv("MCP_HOST", "0.0.0.0"),
+        help="Host to bind to for HTTP transport (default: 0.0.0.0)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=int(os.getenv("MCP_PORT", "8000")),
+        help="Port to bind to for HTTP transport (default: 8000)",
+    )
+
+    args = parser.parse_args()
+
+    if args.transport == "http":
+        # Run with HTTP transport
+        import uvicorn
+        uvicorn.run(mcp.http_app(), host=args.host, port=args.port)
+    else:
+        # Run with stdio transport (default)
+        mcp.run()
+
+
+def main_http():
+    """Entry point for HTTP-only mode (for convenience)."""
+    import sys
+    sys.argv.extend(["--transport", "http"])
+    main()
 
 
 if __name__ == "__main__":

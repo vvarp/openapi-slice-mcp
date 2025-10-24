@@ -25,8 +25,27 @@ The server provides the following MCP tools:
 
 ### Running the Server
 
+#### Stdio Mode (Default)
+
+For local development and Claude Desktop integration:
+
 ```bash
 uvx openapi-slice-mcp
 ```
 
 The server runs using the STDIO transport and can be integrated with any MCP client.
+
+#### HTTP Mode
+
+For Smithery deployment or remote access:
+
+```bash
+# Using the dedicated HTTP entry point (runs on port 8000 by default)
+uvx openapi-slice-mcp-http
+
+# Or using the main entry point with --transport flag
+uvx openapi-slice-mcp --transport http --host 0.0.0.0 --port 8000
+```
+
+The HTTP server exposes the MCP protocol at `http://host:port/mcp`.
+
