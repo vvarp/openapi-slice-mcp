@@ -347,8 +347,7 @@ def main():
 
     if args.transport == "http":
         # Run with HTTP transport
-        import uvicorn
-        uvicorn.run(mcp.http_app(), host=args.host, port=args.port)
+        mcp.run(transport="http", host=args.host, port=args.port)
     else:
         # Run with stdio transport (default)
         mcp.run()
